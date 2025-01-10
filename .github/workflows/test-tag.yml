@@ -13,30 +13,35 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Branch
+      - name: Fetch all branches and tags
+        run: |
+          git fetch --all
+          git fetch --tags
+
+      - name: Get Branch Name
         id: get-branch
         run: |
-          # Ensure all branch and tag information is fetched
-          git fetch --all
-
-          # Identify the branch containing the commit associated with the tag
+          # Find the branch containing the commit
           BRANCH_NAME=$(git branch -r --contains ${{ github.sha }} | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
 
           if [ -z "$BRANCH_NAME" ]; then
-            echo "No branch found for commit ${{ github.sha }}."
+            echo "No branch found for the commit: ${{ github.sha }}."
             exit 1
           fi
 
-          echo "Branch Name: $BRANCH_NAME"
+          echo "Resolved Branch Name: $BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
-      - name: Debug branch info
+      - name: Debug Resolved Branch
         run: |
           echo "Branch Name: $branch_name"
-          git branch -r
-          git log --oneline
 
-      - name: Push changes to branch
+      - name: Push Changes to Resolved Branch
         run: |
-          # Ensure you're pushing to the branch, not the tag
+          # Checkout the branch to ensure it's correctly tracked
+          git checkout $branch_name
+
+          # Make any necessary changes here
+
+          # Push the changes back to the branch
           git push origin $branch_name -f
