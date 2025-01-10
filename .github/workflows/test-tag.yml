@@ -3,6 +3,10 @@ name: Public Beta Release
 on:
   push:
     tags: '*.*.*b*'
+permissions:
+  pull-requests: write
+  issues: write
+  repository-projects: write
 
 jobs:
   build-and-deploy:
