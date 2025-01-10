@@ -20,4 +20,4 @@ jobs:
 
       - name: Print branch name
         run: |
-          echo "git push origin $BRANCH_NAME -f"
+          echo "git push origin $branch_name -f"
