@@ -38,6 +38,8 @@ jobs:
 
       - name: Push Changes to Resolved Branch
         run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
           # Checkout the branch to ensure it's correctly tracked
           git checkout $branch_name
           chmod +x ./bump_version.sh
