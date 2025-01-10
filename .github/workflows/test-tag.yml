@@ -16,19 +16,27 @@ jobs:
       - name: Get Branch
         id: get-branch
         run: |
-          # Fetch all branches to ensure branch info is available
+          # Ensure all branch and tag information is available
           git fetch --all
-          
-          # Find the branch containing the current tag
+
+          # Identify the branch containing the commit associated with the tag
           BRANCH_NAME=$(git branch -r --contains ${{ github.sha }} | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
           
+          # If no branch is found, fallback to default or fail
+          if [ -z "$BRANCH_NAME" ]; then
+            echo "No branch found for commit ${{ github.sha }}."
+            exit 1
+          fi
+
           echo "Branch Name: $BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
-      - name: Print branch name
+      - name: Debug branch info
         run: |
           echo "Branch Name: $branch_name"
-          
+          git branch -r
+          git log --oneline
+
       - name: Push changes to branch
         run: |
           git push origin $branch_name -f
