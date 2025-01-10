@@ -40,8 +40,10 @@ jobs:
         run: |
           # Checkout the branch to ensure it's correctly tracked
           git checkout $branch_name
-
-          # Make any necessary changes here
+          chmod +x ./bump_version.sh
+          ./bump_version.sh "${{ steps.previoustag.outputs.tag }}"
+          git add setup.py
+          git commit -m "Hello"
 
           # Push the changes back to the branch
           git push origin $branch_name -f
