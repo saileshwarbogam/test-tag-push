@@ -1,0 +1,19 @@
+name: Public Beta Release
+
+on:
+  push:
+    tags: '*.*.*b*'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        with:
+          fetch-depth: 0
+        uses: actions/checkout@v1
+      - name: Get Branch
+        run: |
+          branch=$(git branch -r --contains ${{ github.ref }} --format "%(refname:lstrip=3)")
+          echo "Branch Name: $BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
