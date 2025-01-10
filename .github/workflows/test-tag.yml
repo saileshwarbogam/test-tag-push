@@ -16,13 +16,12 @@ jobs:
       - name: Get Branch
         id: get-branch
         run: |
-          # Ensure all branch and tag information is available
+          # Ensure all branch and tag information is fetched
           git fetch --all
 
           # Identify the branch containing the commit associated with the tag
           BRANCH_NAME=$(git branch -r --contains ${{ github.sha }} | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
-          
-          # If no branch is found, fallback to default or fail
+
           if [ -z "$BRANCH_NAME" ]; then
             echo "No branch found for commit ${{ github.sha }}."
             exit 1
@@ -39,4 +38,5 @@ jobs:
 
       - name: Push changes to branch
         run: |
+          # Ensure you're pushing to the branch, not the tag
           git push origin $branch_name -f
