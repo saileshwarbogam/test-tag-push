@@ -8,7 +8,7 @@ if sys.version_info < (3, 8):
 current_version = '2.0.0b51'
 
 setup(
-    name='hellosaib',
+    name='hellosailb',
     version=current_version,
     author='Sailesh',
     author_email='test@gmail.com',
