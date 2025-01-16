@@ -43,18 +43,25 @@ jobs:
         run: |
           echo "Branch Name: ${{ env.branch_name }}"
 
-      - name: Update Version and Commit Changes
+      - name: Get Previous tag
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@v1
+        with:
+          fallback: 1.0.0
+
+      - name: Bump Version
+        run: |
+          chmod +x ./bump_version.sh
+          ./bump_version.sh "${{ steps.previoustag.outputs.tag }}"
+
+      - name: Commit Changes
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
           # Checkout the resolved branch
           git checkout ${{ env.branch_name }}
-          
-          # Update version using your bump_version script
-          chmod +x ./bump_version.sh
-          ./bump_version.sh "${{ github.ref_name }}"
-          
+
           # Add and commit the updated files
           git add setup.py
           git commit -m "Update version for tag ${{ github.ref_name }}"
