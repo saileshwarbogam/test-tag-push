@@ -57,7 +57,7 @@ jobs:
           # Push changes back to the branch
           git push origin ${{ env.branch_name }}
 
-      - name: Download Updated Tag Assets
-        run: |
-          # Ensure the updated files are available
-          ls -la
+      - name: Build and publish
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PUBLISH_TOKEN }}
