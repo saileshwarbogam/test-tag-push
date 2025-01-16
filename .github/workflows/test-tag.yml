@@ -10,19 +10,24 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Fetch Branch Name for Tag
-        id: get-branch
+      - name: Resolve Branch for the Tagged Commit
+        id: resolve-branch
         run: |
-          # Extract the branch name associated with the tag
-          BRANCH_NAME=$(git name-rev --name-only "${{ github.ref_name }}")
+          # Get the commit associated with the tag
+          TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
+
+          # Find the branch containing this commit
+          BRANCH_NAME=$(git branch -r --contains $TAG_COMMIT | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
+
           if [ -z "$BRANCH_NAME" ]; then
-            echo "Failed to resolve branch name for the tag: ${{ github.ref_name }}."
+            echo "Error: Could not resolve branch for the tag."
             exit 1
           fi
 
@@ -33,15 +38,26 @@ jobs:
         run: |
           echo "Branch Name: ${{ env.branch_name }}"
 
-      - name: Commit Changes to Resolved Branch
+      - name: Update Version and Commit Changes
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
+
           # Checkout the resolved branch
           git checkout ${{ env.branch_name }}
+          
+          # Update version using your bump_version script
           chmod +x ./bump_version.sh
           ./bump_version.sh "${{ github.ref_name }}"
+          
+          # Add and commit the updated files
           git add setup.py
           git commit -m "Update version for tag ${{ github.ref_name }}"
-          # Push changes to the branch
+
+          # Push changes back to the branch
           git push origin ${{ env.branch_name }}
+
+      - name: Download Updated Tag Assets
+        run: |
+          # Ensure the updated files are available
+          ls -la
