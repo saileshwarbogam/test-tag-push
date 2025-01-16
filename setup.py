@@ -15,7 +15,6 @@ setup(
     packages=find_packages(where='.', exclude=['test*']),
     license='LICENSE',
     description=' Python programming language',
-    long_description=open('README.rst').read(),
     install_requires=[
 ],
     python_requires=">=3.8"
