@@ -5,7 +5,7 @@ import sys
 
 if sys.version_info < (3, 8):
     raise RuntimeError("requires Python 3.8+")
-current_version = '2.0.0b51'
+current_version = '2.0.0b67'
 
 setup(
     name='hellosailb',
