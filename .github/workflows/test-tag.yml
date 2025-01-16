@@ -3,32 +3,26 @@ name: Public Beta Release
 on:
   push:
     tags: '*.*.*b*'
+
 permissions:
-  contents: read
-  pages: write  
+  contents: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Fetch all branches and tags
-        run: |
-          git fetch --all
-          git fetch --tags
-
-      - name: Get Branch Name
+      - name: Fetch Branch Name for Tag
         id: get-branch
         run: |
-          # Find the branch containing the commit
-          BRANCH_NAME=$(git branch -r --contains ${{ github.sha }} | grep -o 'origin/.*' | sed 's|origin/||' | head -n 1)
-
+          # Extract the branch name associated with the tag
+          BRANCH_NAME=$(git name-rev --name-only "${{ github.ref_name }}")
           if [ -z "$BRANCH_NAME" ]; then
-            echo "No branch found for the commit: ${{ github.sha }}."
+            echo "Failed to resolve branch name for the tag: ${{ github.ref_name }}."
             exit 1
           fi
 
@@ -37,18 +31,17 @@ jobs:
 
       - name: Debug Resolved Branch
         run: |
-          echo "Branch Name: $branch_name"
+          echo "Branch Name: ${{ env.branch_name }}"
 
-      - name: Push Changes to Resolved Branch
+      - name: Commit Changes to Resolved Branch
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
-          # Checkout the branch to ensure it's correctly tracked
-          git checkout $branch_name
+          # Checkout the resolved branch
+          git checkout ${{ env.branch_name }}
           chmod +x ./bump_version.sh
-          ./bump_version.sh "${{ steps.previoustag.outputs.tag }}"
+          ./bump_version.sh "${{ github.ref_name }}"
           git add setup.py
-          git commit -m "Hello"
-
-          # Push the changes back to the branch
-          git push origin $branch_name -f
+          git commit -m "Update version for tag ${{ github.ref_name }}"
+          # Push changes to the branch
+          git push origin ${{ env.branch_name }}
